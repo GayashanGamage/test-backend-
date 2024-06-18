@@ -1,0 +1,6 @@
+include/
+Lib/
+Scripts/
+__pycache__/
+*.json
+*.cfg
