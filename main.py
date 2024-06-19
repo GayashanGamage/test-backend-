@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from pymongo import MongoClient
+from pydantic import BaseModel
 
 app = FastAPI()
-
+client = MongoClient('mongodb+srv://gayashanrandimagamage:2692g.rg0968CJ@cluster0.kdywp1p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+db = client['main']
+cluster = db['user']
 
 origins = ["*"]
 
@@ -14,10 +18,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class User(BaseModel):
+    firstName :str
+    lastName :str
+    password :str
+
+
 @app.get('/')
 def home():
     return 'this is home'
 
-@app.get('/about')
-def about():
-    return 'this is about page'
+@app.post('/user')
+def user(user: User):
+    cluster.insert_one({
+        'first name' : user.firstName,
+        'last name' : user.lastName,
+        'password' : user.password
+    })
