@@ -24,6 +24,11 @@ class User(BaseModel):
     lastName :str
     password :str
 
+def all_users():
+    alll = list(cluster.find())
+    for item in alll:
+        item['_id'] = str(item['_id'])
+    return alll
 
 @app.get('/')
 def home():
@@ -36,11 +41,10 @@ def user(user: User):
         'last name' : user.lastName,
         'password' : user.password
     })
-    return allUser()
+    al = all_users()
+    return al
 
 @app.get('/allUser')
 async def allUser():
-    alll = list(cluster.find())
-    for item in alll:
-        item['_id'] = str(item['_id'])
-    return alll  
+    al = all_users()
+    return al  
