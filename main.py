@@ -50,7 +50,7 @@ async def allUser():
     al = all_users()
     return al  
 
-@app.delete('/delete-user')
+@app.delete('/delete-user/{id}')
 async def deleteUser(id : str):
     userId = ObjectId(id)
     cluster.delete_one({'_id' : userId})
