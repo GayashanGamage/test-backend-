@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from pydantic import BaseModel
 from typing import List
+from bson import ObjectId
 
 app = FastAPI()
 client = MongoClient('mongodb+srv://gayashanrandimagamage:2692g.rg0968CJ@cluster0.kdywp1p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
@@ -48,3 +49,9 @@ def user(user: User):
 async def allUser():
     al = all_users()
     return al  
+
+@app.delete('/delete-user')
+async def deleteUser(id : str):
+    userId = ObjectId(id)
+    cluster.delete_one({'_id' : userId})
+    return 'successfull'
