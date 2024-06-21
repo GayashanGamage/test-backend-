@@ -54,4 +54,5 @@ async def allUser():
 async def deleteUser(id : str):
     userId = ObjectId(id)
     cluster.delete_one({'_id' : userId})
-    return 'successfull'
+    al = all_users()
+    return al
