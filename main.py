@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient
 from pydantic import BaseModel
+from typing import List
 
 app = FastAPI()
 client = MongoClient('mongodb+srv://gayashanrandimagamage:2692g.rg0968CJ@cluster0.kdywp1p.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
@@ -35,3 +36,11 @@ def user(user: User):
         'last name' : user.lastName,
         'password' : user.password
     })
+    return allUser()
+
+@app.get('/allUser')
+async def allUser():
+    alll = list(cluster.find())
+    for item in alll:
+        item['_id'] = str(item['_id'])
+    return alll  
