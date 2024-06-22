@@ -25,15 +25,17 @@ class User(BaseModel):
     lastName :str
     password :str
 
+class UserDetails(BaseModel):
+    _id : str
+    firstName : str
+    lastName : str
+    password : str
+
 def all_users():
     alll = list(cluster.find())
     for item in alll:
         item['_id'] = str(item['_id'])
     return alll
-
-@app.get('/')
-def home():
-    return 'this is home'
 
 @app.post('/user')
 def user(user: User):
@@ -54,5 +56,15 @@ async def allUser():
 async def deleteUser(id : str):
     userId = ObjectId(id)
     cluster.delete_one({'_id' : userId})
+    al = all_users()
+    return al
+
+@app.patch('/update-user/{:userID}')
+async def updateUser(userID:str, userDetails : UserDetails):
+    cluster.update_one({'_id' : ObjectId(userID)}, { '$set' : {
+        'first name' : userDetails.firstName,
+        'last name' : userDetails.lastName,
+        'password' : userDetails.password
+    }})
     al = all_users()
     return al
