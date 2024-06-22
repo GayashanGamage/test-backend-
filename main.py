@@ -59,7 +59,7 @@ async def deleteUser(id : str):
     al = all_users()
     return al
 
-@app.patch('/update-user/{:userID}')
+@app.patch('/update-user/{userID}')
 async def updateUser(userID:str, userDetails : UserDetails):
     cluster.update_one({'_id' : ObjectId(userID)}, { '$set' : {
         'first name' : userDetails.firstName,
