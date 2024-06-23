@@ -14,6 +14,7 @@ app = FastAPI()
 client = MongoClient(os.getenv('mongodb'))
 db = client['main']
 cluster = db['user']
+users = db['userBase']
 
 origins = ["*"]
 
@@ -36,20 +37,32 @@ class User(BaseModel):
     lastName :str
     password :str
 
-class UserDetails(BaseModel):
-    firstName : str
-    lastName : str
-    password : str
-
 class mailDetail(BaseModel):
     name : str
     reciverMail : str
+
+class userDetails(BaseModel):
+    firstName : str
+    lastName : str
+    email : str
+    password : str
 
 def all_users():
     alll = list(cluster.find())
     for item in alll:
         item['_id'] = str(item['_id'])
     return alll
+
+# check duplicate emails
+def checkMail(userEmail):
+    al = list(users.find())
+    if len(al) == 0:
+        return False
+
+    for item in al:
+        if item['email'] == userEmail:
+            return True
+    return False
 
 @app.post('/user', tags=['crud'])
 def user(user: User):
@@ -74,7 +87,7 @@ async def deleteUser(id : str):
     return al
 
 @app.patch('/update-user/{userID}', tags=['crud'])
-async def updateUser(userID:str, userDetails : UserDetails):
+async def updateUser(userID:str, userDetails : User):
     cluster.update_one({'_id' : ObjectId(userID)}, { '$set' : {
         'first name' : userDetails.firstName,
         'last name' : userDetails.lastName,
@@ -98,3 +111,18 @@ async def sendMail(mailDetail : mailDetail):
 
     api_response = api_instance.send_transac_email(send_smtp_email)
     return api_response
+
+
+@app.post('/user-register', tags=['login'])
+async def userRegister (userDetails : userDetails):
+    checkMails = checkMail(userDetails.email)
+    if checkMails == True:
+        return 'dubplicate email'
+    else:
+        users.insert_one({
+            'fist name' : userDetails.firstName,
+            'last name' : userDetails.lastName,
+            'email' : userDetails.email,
+            'passwod' : userDetails.password
+        })
+        return 'succsessfull'
