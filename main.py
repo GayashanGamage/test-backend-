@@ -26,7 +26,6 @@ class User(BaseModel):
     password :str
 
 class UserDetails(BaseModel):
-    _id : str
     firstName : str
     lastName : str
     password : str
@@ -37,7 +36,7 @@ def all_users():
         item['_id'] = str(item['_id'])
     return alll
 
-@app.post('/user')
+@app.post('/user', tags=['crud'])
 def user(user: User):
     cluster.insert_one({
         'first name' : user.firstName,
@@ -47,19 +46,19 @@ def user(user: User):
     al = all_users()
     return al
 
-@app.get('/allUser')
+@app.get('/allUser', tags=['crud'])
 async def allUser():
     al = all_users()
     return al  
 
-@app.delete('/delete-user/{id}')
+@app.delete('/delete-user/{id}', tags=['crud'])
 async def deleteUser(id : str):
     userId = ObjectId(id)
     cluster.delete_one({'_id' : userId})
     al = all_users()
     return al
 
-@app.patch('/update-user/{userID}')
+@app.patch('/update-user/{userID}', tags=['crud'])
 async def updateUser(userID:str, userDetails : UserDetails):
     cluster.update_one({'_id' : ObjectId(userID)}, { '$set' : {
         'first name' : userDetails.firstName,
