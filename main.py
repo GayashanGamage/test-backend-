@@ -55,17 +55,6 @@ def all_users():
         item['_id'] = str(item['_id'])
     return alll
 
-# send recovery code mail
-def sendRecoveryCode(recoveryCode):
-    subject = "recovery code"
-    sender = {"name":"gamage.me","email":"gayashan.randimagamage@gmail.com"}
-    to = [{"email": 'chamodijanithya@gmail.com',"name": 'chomodi janithya'}]
-    headers = {"Some-Custom-Name":"unique-id-1234"}
-    # params = {"parameter":"My param value","subject":"New Subject"}
-    send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, headers=headers, sender=sender, subject=subject, template_id=2, params={"code": recoveryCode})
-
-    api_response = api_instance.send_transac_email(send_smtp_email)
-    return api_response
 
 
 # check duplicate emails
@@ -115,7 +104,7 @@ async def updateUser(userID:str, userDetails : User):
 async def sendMail(mailDetail : mailDetail):
     subject = "My Subject"
     html_content = "<html><body><h1>welcome to ROPAPER </h1></body></html>"
-    sender = {"name":"John Doe","email":"gayashan.randimagamage@gmail.com"}
+    sender = {"name":"Gayashan Gamage","email":"gayashan.randimagamage@gmail.com"}
     to = [{"email": mailDetail.reciverMail,"name": mailDetail.name}]
     # cc = [{"email":"example2@example2.com","name":"Janice Doe"}]
     # bcc = [{"name":"John Doe","email":"example@example.com"}]
@@ -150,11 +139,21 @@ async def sendRecoveryCode(email : str):
     else:
         b = users.find_one({'email' : email})
         recoveryCode = randint(1000, 9999)
+        # email - details 
+        subject = "recovery code"
+        html_content = "<html><body><h1>welcome to ROPAPER </h1></body></html>"
+        sender = {"name":"Gayashan Gayashan","email":"gayashan.randimagamage@gmail.com"}
+        to = [{"email": 's92065811@ousl.lk' ,"name": 'chamodi janithya'}]
+        headers = {"Some-Custom-Name":"unique-id-1234"}
+        send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, headers=headers, html_content=html_content, sender=sender, subject=subject, template_id=2, params={'code' : recoveryCode})
+        
+        # validation 
         if 'recovery code' in b:
             if len(b['recovery code']) < 3:
                 b['recovery code'].append({'code': recoveryCode, 'time' : datetime.now()})
                 users.update_one({'email' : email}, {'$set' : b})
-                sendRecoveryCode(recoveryCode)
+                # send email
+                api_response = api_instance.send_transac_email(send_smtp_email)
                 return 'created new code'
 
             elif len(b['recovery code']) == 3:
@@ -165,10 +164,12 @@ async def sendRecoveryCode(email : str):
                     b['recovery code'].pop(0)
                     b['recovery code'].append({'code': recoveryCode, 'time' : datetime.now()})
                     users.update_one({'email' : email}, {'$set' : b})
-                    sendRecoveryCode(recoveryCode)
+                    # send email
+                    api_response = api_instance.send_transac_email(send_smtp_email)
                     return 'created new code'
         else:
             b['recovery code'] = [{'code': recoveryCode, 'time' : datetime.now()}]
             users.update_one({'email' : email}, {'$set' : b})
-            sendRecoveryCode(recoveryCode)
+            # send email
+            api_response = api_instance.send_transac_email(send_smtp_email)
             return 'created new code'
