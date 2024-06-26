@@ -49,13 +49,15 @@ class userDetails(BaseModel):
     email : str
     password : str
 
+class Validation(BaseModel):
+    email : str
+    code : int
+
 def all_users():
     alll = list(cluster.find())
     for item in alll:
         item['_id'] = str(item['_id'])
     return alll
-
-
 
 # check duplicate emails
 def checkMail(userEmail):
@@ -173,3 +175,11 @@ async def sendRecoveryCode(email : str):
             # send email
             api_response = api_instance.send_transac_email(send_smtp_email)
             return 'created new code'
+
+@app.post('/codeValidation')
+async def codeValidation(validation : Validation):
+    accountDetails = users.find_one({'email' : validation.email})
+    if accountDetails['recovery code'][-1]['code'] == validation.code:
+        return 'valide code'
+    else:
+        return 'invalid code'
