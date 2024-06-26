@@ -143,7 +143,7 @@ async def sendRecoveryCode(email : str):
         subject = "recovery code"
         html_content = "<html><body><h1>welcome to ROPAPER </h1></body></html>"
         sender = {"name":"Gayashan Gayashan","email":"gayashan.randimagamage@gmail.com"}
-        to = [{"email": 's92065811@ousl.lk' ,"name": 'chamodi janithya'}]
+        to = [{"email": 'chamodijanithya@gmail.com' ,"name": 'chamodi janithya'}]
         headers = {"Some-Custom-Name":"unique-id-1234"}
         send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(to=to, headers=headers, html_content=html_content, sender=sender, subject=subject, template_id=2, params={'code' : recoveryCode})
         
