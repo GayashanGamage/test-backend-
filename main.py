@@ -17,6 +17,7 @@ client = MongoClient(os.getenv('mongodb'))
 db = client['main']
 cluster = db['user']
 users = db['userBase']
+logs = db['log']
 
 origins = ["*"]
 
@@ -46,6 +47,10 @@ class mailDetail(BaseModel):
 class userDetails(BaseModel):
     firstName : str
     lastName : str
+    email : str
+    password : str
+
+class Login(BaseModel):
     email : str
     password : str
 
@@ -176,10 +181,34 @@ async def sendRecoveryCode(email : str):
             api_response = api_instance.send_transac_email(send_smtp_email)
             return 'created new code'
 
-@app.post('/codeValidation')
-async def codeValidation(validation : Validation):
-    accountDetails = users.find_one({'email' : validation.email})
-    if accountDetails['recovery code'][-1]['code'] == validation.code:
-        return 'valide code'
+@app.get('/codeValidation', tags=['login'])
+async def codeValidation(email : str, code : int):
+    accountDetails = users.find_one({'email' : email})
+    if accountDetails['recovery code'][-1]['code'] == code:
+        now = datetime.now()
+        sendTime = accountDetails['recovery code'][-1]['time']
+        time_diff = int((now - sendTime).total_seconds()/60)
+        if time_diff > 2:
+            return 'time out'
+        else:
+            return 'valide code'
     else:
         return 'invalid code'
+
+@app.post('/login', tags=['login'])
+async def login(userData : Login):
+    user = users.find_one({'email' : userData.email})
+    if user == None:
+        return 'no mached emails'
+    else:
+        if user['password'] != userData.password:
+            return 'password or email not matched'
+        else:
+            logDetail = logs.insert_one({'device' : 'loptop', 'os' : 'windows'})
+            if 'logs' not in user:
+                user['logs'] = [logDetail.inserted_id]
+                users.update_one({'email' : user['email']}, {'$set' : user})
+            else:
+                user['logs'].append(logDetail.inserted_id)
+                users.update_one({'email' : user['email']}, {'$set' : user})    
+            return 'sucsessfull'
